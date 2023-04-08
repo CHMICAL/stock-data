@@ -1,5 +1,6 @@
-from strategies.simple_ma import build_ma_df
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 
 def simple_datetime_price_plot(df, tkr):
     plt.figure(figsize=(20, 6))
@@ -9,5 +10,7 @@ def simple_datetime_price_plot(df, tkr):
 
     plt.xlabel('Date')
     plt.ylabel('Price ($)')
+
+    plt.xlim(df.index[0], df.index[-1])
 
     plt.savefig(f'out/simple_ma_{tkr}')

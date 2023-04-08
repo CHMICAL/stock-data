@@ -1,3 +1,5 @@
+import pandas as pd
+
 from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
 import numpy as np
 
@@ -17,6 +19,7 @@ def build_ma_df(ticker):
 	data_df = get_csv_data(ticker)
 
 	data_df.set_index(['datetime'], drop=True, inplace=True)
+	data_df.index = pd.to_datetime(data_df.index)
 
 	price_data_df = data_df.loc[:, ['close']]
 
