@@ -1,4 +1,5 @@
-from data_scraping.twelve_data-scrape import get_api_data, get_csv_data
+from data_scraping.twelve_data_scrape import get_api_data, get_csv_data
+
 
 def build_ma_df(get_latest_data=False):
 	"""
@@ -13,9 +14,9 @@ def build_ma_df(get_latest_data=False):
 
 	"""
 	if get_latest_data:
-		data_df = get_api_data(TICKER)
+		data_df = get_api_data('AMZN')
 	else:
-		data_df = get_csv_data(TICKER)
+		data_df = get_csv_data('AMZN')
 	data_df.set_index(keys='datetime', drop=True)
 
 	price_data_df = data_df.loc[:, ['close']]
@@ -30,6 +31,4 @@ def build_ma_df(get_latest_data=False):
 		if index - 50 >= 0:
 			price_data_df.iloc[index]['50_SMA'] = (price_data_df.iloc[index - 50: index])/50
 
-	plot = plt.plot(data=price_data_df)
-
-	plot.savefig('out.csv')
+	return price_data_df
