@@ -1,8 +1,13 @@
 from strategies.simple_ma import build_ma_df
 import matplotlib.pyplot as plt
 
-def plots():
-    price_data_df = build_ma_df()
-    plot = plt.plot(data=price_data_df)
+def simple_datetime_price_plot(df, tkr):
+    plt.figure(figsize=(20, 6))
+    plt.plot(df[::-1])
 
-    plot.savefig('out.csv')
+    plt.legend(df.columns)
+
+    plt.xlabel('Date')
+    plt.ylabel('Price ($)')
+
+    plt.savefig(f'out/simple_ma_{tkr}')
