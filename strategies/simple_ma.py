@@ -51,7 +51,7 @@ def build_ma_df(ticker):
 
 			strat_df.loc[day, ['action']] = 'SELL'
 			strat_df.loc[day, ['return']] = strat_df.loc[day, ['return']]
-	#TODO-FIX THIS
+	#TODO-FIX THIS pls
 
 
 
