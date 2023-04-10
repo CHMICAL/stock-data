@@ -4,6 +4,9 @@ import logging
 import pandas as pd
 import json
 
+logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO)
+
 
 def get_api_data(ticker, days):
 	conn = http.client.HTTPSConnection("twelve-data1.p.rapidapi.com")
@@ -17,14 +20,16 @@ def get_api_data(ticker, days):
 
 	res = conn.getresponse()
 
-	if res.status is not 200:
+	if res.status != 200:
 		raise ConnectionError(res.msg)
 	
 	price_json = json.loads(res.read())
 
 	price_data_df = pd.DataFrame(price_json['values'])
 
-	price_data_df.to_csv(fr'twelve_data/{ticker}.csv')
+	price_data_df = price_data_df[::-1]
+
+	price_data_df.to_csv(fr'csvs/{ticker}.csv')
 
 
 def get_csv_data(ticker):
@@ -48,5 +53,26 @@ def scrape_all_tickers(years_to_scrape=5):
 			get_api_data(ticker, days=365*years_to_scrape)
 
 		except ConnectionError:
-			logging.warning(f'API rejected data request for {ticker}. Continuing')
+			logger.warning(f'API rejected data request for {ticker}. Continuing')
 			continue
+
+
+def scrape_one_ticker(ticker, years_to_scrape=5):
+	"""
+	Scrapes all data for one ticker
+
+	Parameters
+	----------
+	ticker: str, Stock ticker e.g. AMZN
+	years_to_scrape: int, defaults to 5, number of years to scrape back
+	"""
+
+	try:
+		get_api_data(ticker, days=365*years_to_scrape)
+
+	except ConnectionError:
+		logger.warning(f'API rejected data request for {ticker}. Continuing')
+
+
+if __name__ == '__main__':
+	scrape_one_ticker('AMZN')

@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+import os
 
 
-def simple_datetime_price_plot(df, tkr):
+def plot_strat_df(df, tkr):
+    df.drop('holding', axis=1, inplace=True)
     plt.figure(figsize=(20, 6))
-    plt.plot(df[::-1])
+    plt.plot(df)
 
     plt.legend(df.columns)
 
@@ -13,4 +14,5 @@ def simple_datetime_price_plot(df, tkr):
 
     plt.xlim(df.index[0], df.index[-1])
 
+    os.makedirs('out', exist_ok=True)
     plt.savefig(f'out/simple_ma_{tkr}')
