@@ -40,6 +40,32 @@ def build_ma_strat_df(ticker):
 	return price_data_df
 
 
+
+def build_ma_df_ema(ticker, time_period):
+	'''sample data'''
+	ticker = "AMZN"
+	time_period = 10
+	'''sample data'''
+
+
+	weight_mult = 2 / (time_period + 1)
+
+	data_df = get_csv_data(ticker)
+
+	data_df.set_index(['datetime'], drop=True, inplace=True)
+	data_df.index = pd.to_datetime(data_df.index)
+
+	price_data_df = data_df.loc[:, ['close']]
+
+	for i, day in enumerate(price_data_df.index):
+		price_data_df.loc[day, ['20_SMA']] = round(np.average(price_data_df['close'][i : i + 19]), 2)
+
+		price_data_df.loc[day, ['50_SMA']] = round(np.average(price_data_df['close'][i : i + 49]), 2)
+
+
+
+
+
 def get_ma_from_df(days, df, i):
 	return round(np.average(df['close'].values[i - days: i]), 2)
 
