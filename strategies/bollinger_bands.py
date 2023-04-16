@@ -1,12 +1,15 @@
 import pandas as pd
-# from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
+from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
+from simple_ma import build_moving_avg_col
 import numpy as np
 import pprint as pprint
 import matplotlib.pyplot as plt
  
-
-
-
+with open(fr"data_scraping\twelve_data\tickers.txt", "r") as f:
+    text = f.read()
+    tickers = text.split("\n")
+    tickers = [ticker.strip() for ticker in tickers]
+    
 def bollinger_bands(ticker, time_period):
 
     data_df = get_csv_data(ticker)
@@ -14,10 +17,8 @@ def bollinger_bands(ticker, time_period):
     data_df.index = pd.to_datetime(data_df.index)
     price_data_df = data_df.loc[:, ['close']]
 
-    price_data_df[f'{time_period}_SMA'] = None
 
-    for i, day in enumerate(price_data_df.index):
-        price_data_df.loc[day, [f'{time_period}_SMA']] = round(np.average(price_data_df['close'][i : i + {time_period}]), 2)
+    price_data_df = build_moving_avg_col(price_data_df ,time_period)
 
     price_data_df['bolling_up'] = None
     price_data_df['bolling_low'] = None

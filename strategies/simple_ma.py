@@ -8,6 +8,14 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
 
+def build_moving_avg_col(price_data_df, time_period):
+	price_data_df[f'{time_period}_SMA'] = None
+	for i, day in enumerate(price_data_df.index):	
+		price_data_df.loc[day, [f'{time_period}_SMA']] = round(np.average(price_data_df['close'][i : i + {time_period}]), 2)
+	
+	return price_data_df
+
+
 def build_ma_strat_df(ticker):
 	"""
 	Builds basic 20 and 50 day ma df
@@ -27,7 +35,7 @@ def build_ma_strat_df(ticker):
 
 	price_data_df = data_df.loc[:, ['close']]
 
-	price_data_df['20_SMA'] = None
+	price_data_df = build_moving_avg_col()
 	price_data_df['50_SMA'] = None
 
 	for i, day in enumerate(price_data_df.index):
@@ -62,12 +70,6 @@ def build_ma_df_ema(ticker, time_period):
 
 		price_data_df.loc[day, ['50_SMA']] = round(np.average(price_data_df['close'][i : i + 49]), 2)
 
-
-
-
-
-def get_ma_from_df(days, df, i):
-	return round(np.average(df['close'].values[i - days: i]), 2)
 
 
 def build_returns_df(ticker, strat_df):

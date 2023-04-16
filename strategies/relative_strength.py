@@ -5,15 +5,7 @@ import pprint as pprint
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 
-'''
-Calculating RSI...
-1. Determine time period n (typically 14 days, but can be adjusted)
-2. Price change: For each day in the time period, calculate the price change
-i.e., the difference between the current day's closing price and the previous day's closing price
-if positive add to average_gain, if negative add to the average_loss and then calculate average
-3. Calculate the relative strength: mean of all the gains in the last n days / mean of all the lossesin the last n days
-4. Calculate the RSI: RSI = 100 - (100 / (1+RS))
-'''
+
 
 
 with open(fr"data_scraping\twelve_data\tickers.txt", "r") as f:
@@ -22,6 +14,10 @@ with open(fr"data_scraping\twelve_data\tickers.txt", "r") as f:
     tickers = [ticker.strip() for ticker in tickers]
 
 def build_rsi_df(ticker, time_period):
+    '''
+    Calculate the relative strength: mean of all the gains in the last n days / mean of all the losses  in the last n days
+    Calculate the RSI: RSI = 100 - (100 / (1+RS))
+    '''
     data_df = get_csv_data(ticker)
     data_df.set_index(['datetime'], drop=True, inplace=True)
     data_df.index = pd.to_datetime(data_df.index)

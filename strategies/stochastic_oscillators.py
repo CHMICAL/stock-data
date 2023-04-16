@@ -1,5 +1,5 @@
 import pandas as pd
-# from GetRichQuickScheme.data_scraping.twelve_data.twelve_data_scrape import get_csv_data
+from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
 import numpy as np
 import pprint as pprint
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ with open(fr"data_scraping\twelve_data\tickers.txt", "r") as f:
     tickers = [ticker.strip() for ticker in tickers]
 
 
-def build_stochastic_oscillator(ticker, time_period):
+def build_stochastics(ticker, time_period):
     """
     Calculate the Stochastic Oscillator for a given DataFrame and period time_period.
     """
@@ -30,4 +30,4 @@ def build_stochastic_oscillator(ticker, time_period):
 
 time_period = 20
 
-print(build_stochastic_oscillator("AMZN", time_period))
+print(build_stochastics("AMZN", time_period))
