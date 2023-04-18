@@ -1,12 +1,19 @@
 import pandas as pd
 import numpy as np
-from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
 
+'''
+Functions to build basic technical indicators.
+
+Parameters:
+    df (pandas.DataFrame): A dataframe containing stock data for a specific stock.
+
+Returns:
+    df (pandas.DataFrame): Additional column(s) with values for the technical indicator
+'''
 
 def build_sma_col(df, window_size):
     df[f'{window_size}_SMA'] = df['close'].rolling(window_size).mean().round(2)
     return df
-
 
 def build_ema_col(df, window_size):
     df[f'{window_size}_EMA'] = df['close'].ewm(span=window_size, adjust=False).mean()
@@ -58,7 +65,6 @@ def build_macd_col(df, fast_window=12, slow_window=26, signal_window=9):
     df['MACD_hist'] = histogram
     return df
 
-
 def build_atr_col(df, window_size=14):
     tr1 = abs(df['high'] - df['low'])
     tr2 = abs(df['high'] - df['close'].shift())
@@ -107,7 +113,6 @@ def build_adx_col(df, window_size):
     df = df.join(adx_col)
     return df
 
-
 def build_envelopes_col(df, window_size, envelope_size):
     ma = df['close'].rolling(window_size).mean()
     upper_band = ma * (1 + envelope_size/100)
@@ -116,11 +121,26 @@ def build_envelopes_col(df, window_size, envelope_size):
     df = df.join(envelopes_col)
     return df
 
-
 def build_williamsr_col(df, window_size):
     highest_high = df['high'].rolling(window_size).max()
     lowest_low = df['low'].rolling(window_size).min()
     williams_r = -100 * (highest_high - df['close']) / (highest_high - lowest_low)
     williamsr_col = pd.Series(williams_r, name='Williams %R')
     df = df.join(williamsr_col)
+    return df
+
+
+
+'''
+set_date_as_idx_and_dtobj
+
+Parameters:
+    df (pandas.DataFrame): A dataframe containing stock data for a specific stock.
+
+Returns:
+    df (pandas.DataFrame): Sets the date as the index of the df. Converts the index to datetime objects
+'''
+def set_date_as_idx_and_dtobj(df):
+    df.set_index(['datetime'], drop=True, inplace=True)
+    df.index = pd.to_datetime(df.index)
     return df
