@@ -1,101 +1,45 @@
 import pandas as pd
-
-from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
+from data_scraping.twelve_data.twelve_data_scrape import get_stock_data
+from utilities.quantitive.basic_utils import build_sma_col
+from utilities.quantitive.basic_utils import set_date_as_idx_and_dtobj
 import numpy as np
-import logging
+import pprint as pprint
+import matplotlib.pyplot as plt
+from datetime import timedelta
 
-logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
+def simulate_simple_ma(input_amount, stock_df, short_window, long_window):
+    stock_df = set_date_as_idx_and_dtobj(stock_df)
+    stock_df = build_sma_col(stock_df, short_window)
+    stock_df = build_sma_col(stock_df, long_window)
+    stock_df['returns'] = None
+    
+    cash = input_amount
+    stock_holding = 0
 
-
-def build_ma_strat_df(ticker):
-	"""
-	Builds basic 20 and 50 day ma df
-
-	Parameters
-	----------
-	ticker: str, eg 'AMZN'
-
-	Returns
-	-------
-
-	"""
-	data_df = get_csv_data(ticker)
-
-	data_df.set_index(['datetime'], drop=True, inplace=True)
-	data_df.index = pd.to_datetime(data_df.index)
-
-	price_data_df = data_df.loc[:, ['close']]
-
-	price_data_df['20_SMA'] = None
-	price_data_df['50_SMA'] = None
-
-	for i, day in enumerate(price_data_df.index):
-		price_data_df.loc[day, ['20_SMA']] = get_ma_from_df(days=20, df=price_data_df, i=i)
-
-		price_data_df.loc[day, ['50_SMA']] = get_ma_from_df(days=50, df=price_data_df, i=i)
-
-	price_data_df['holding'] = price_data_df['20_SMA'] > price_data_df['50_SMA']
-
-	return price_data_df
-
-
-
-def build_ma_df_ema(ticker, time_period):
-	'''sample data'''
-	ticker = "AMZN"
-	time_period = 10
-	'''sample data'''
+    for i, cell in stock_df.iterrows():
+        
+        # Buy if short SMA goes above the long SMA
+        if cell[f'{short_window}_SMA'] > cell[f'{long_window}_SMA'] and cash > 0:
+            stock_price = cell['close']
+            shares_to_buy = cash / stock_price
+            stock_holding += shares_to_buy
+            cash -= shares_to_buy * stock_price
+        
+        # Sell if short SMA goes below the long SMA
+        elif cell[f'{short_window}_SMA'] < cell[f'{long_window}_SMA'] and stock_holding > 0:
+            stock_price = cell['close']
+            cash += stock_holding * stock_price
+            stock_holding = 0
+        
+        # Calculate daily return
+        if stock_holding > 0:
+            stock_value = stock_holding * cell['close']
+            total_value = cash + stock_value
+            daily_return = (total_value - input_amount) / input_amount
+            stock_df.at[i, 'returns'] = daily_return
+        else:
+            stock_df.at[i, 'returns'] = 0
+            
+    return stock_df
 
 
-	weight_mult = 2 / (time_period + 1)
-
-	data_df = get_csv_data(ticker)
-
-	data_df.set_index(['datetime'], drop=True, inplace=True)
-	data_df.index = pd.to_datetime(data_df.index)
-
-	price_data_df = data_df.loc[:, ['close']]
-
-	for i, day in enumerate(price_data_df.index):
-		price_data_df.loc[day, ['20_SMA']] = round(np.average(price_data_df['close'][i : i + 19]), 2)
-
-		price_data_df.loc[day, ['50_SMA']] = round(np.average(price_data_df['close'][i : i + 49]), 2)
-
-
-
-
-
-def get_ma_from_df(days, df, i):
-	return round(np.average(df['close'].values[i - days: i]), 2)
-
-
-def build_returns_df(ticker, strat_df):
-	strat_df = build_ma_strat_df(ticker)
-	strat_df['action'] = None
-	strat_df['return'] = None
-	strat_df['tot_return'] = None
-	strat_df.loc[strat_df.index[0], ['tot_return']] = 0
-
-	for i, day in enumerate(strat_df.index[1:]):
-		i += 1
-		if not strat_df.loc[strat_df.index[i - 1], 'holding'] and\
-			strat_df.loc[strat_df.index[i], 'holding']:
-			strat_df.loc[day, ['action']] = 'BUY'
-
-		if strat_df.loc[strat_df.index[i - 1], 'holding'] and\
-			not strat_df.loc[strat_df.index[i], 'holding'] and\
-			'BUY' in strat_df['action'].values[:i]:
-
-			strat_df.loc[day, ['action']] = 'SELL'
-
-			buy_price = strat_df[strat_df['action'] == 'BUY']['close'].values[-1]
-			sell_price = strat_df.loc[day]['close']
-			pct_return = (sell_price - buy_price) / buy_price
-
-			strat_df.loc[day, ['return']] = pct_return
-
-			last_tot_return = strat_df['tot_return'].dropna().values[-1]
-			strat_df.loc[day, ['tot_return']] = ((1 + last_tot_return) * (1 + pct_return)) - 1
-
-	return strat_df
