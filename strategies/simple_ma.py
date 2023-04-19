@@ -1,14 +1,14 @@
 import pandas as pd
-from data_scraping.twelve_data.twelve_data_scrape import get_csv_data
+from data_scraping.twelve_data.twelve_data_scrape import get_stock_data
 from utilities.quantitive.basic_utils import build_sma_col
-from utilities.quantitive.basic_utils import set_date_as_idx
+from utilities.quantitive.basic_utils import set_date_as_idx_and_dtobj
 import numpy as np
 import pprint as pprint
 import matplotlib.pyplot as plt
 from datetime import timedelta
 
 def simulate_simple_ma(input_amount, stock_df, short_window, long_window):
-    stock_df = set_date_as_idx(stock_df)
+    stock_df = set_date_as_idx_and_dtobj(stock_df)
     stock_df = build_sma_col(stock_df, short_window)
     stock_df = build_sma_col(stock_df, long_window)
     stock_df['returns'] = None
