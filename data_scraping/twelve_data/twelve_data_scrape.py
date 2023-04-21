@@ -93,11 +93,17 @@ def get_stock_data(ticker):
 
 
 data_dir = "data_scraping/twelve_data/data"
-years_to_scrape = 13
-tickers = get_tickers()
+# years_to_scrape = 13
+# tickers = get_tickers()
 
+<<<<<<< Updated upstream
 for ticker in tickers:
     get_api_data(ticker, days = 365*years_to_scrape)
     break
+=======
+# for ticker in tickers:
+#     get_api_data(ticker, days = 365*years_to_scrape)
+    
+>>>>>>> Stashed changes
     
 
