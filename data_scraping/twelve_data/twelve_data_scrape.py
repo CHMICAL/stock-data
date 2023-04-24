@@ -30,6 +30,8 @@ output:
 def get_api_data(ticker, days):
     if file_exists_in_folder(data_dir, f'{ticker}.csv'):
         return
+    if file_exists_in_folder(data_dir, f'{ticker}.csv'):
+        return
     tickers_with_err_msg = []
     conn = http.client.HTTPSConnection("twelve-data1.p.rapidapi.com")
 
@@ -45,6 +47,7 @@ def get_api_data(ticker, days):
     try:
         price_data_df = pd.DataFrame(price_json['values'])
         meta_data_json = price_json['meta']
+        append_to_meta_data(ticker, meta_data_json)
         append_to_meta_data(ticker, meta_data_json)
         exchange_name = meta_data_json['exchange']
         subfolder = os.path.join(data_dir, exchange_name)
@@ -99,6 +102,33 @@ def file_exists_in_folder(path, filename):
     return False
 
 
+def append_to_meta_data(ticker, meta_data):
+    meta_file_path = os.path.join(data_dir, "meta_data.json")
+    
+    if not os.path.exists(meta_file_path):
+        with open(meta_file_path, "w") as outfile:
+            json.dump({ticker: meta_data}, outfile)
+    else:
+        with open(meta_file_path, "r+") as outfile:
+            data = json.load(outfile)
+            data[ticker] = meta_data
+            outfile.seek(0)
+            json.dump(data, outfile)
+            outfile.truncate()
+
+def exchange_name_check(ticker):
+    with open(f'{data_dir}/meta_data.json', 'rb') as f:
+        meta_data = json.load(f)
+        exchange_name = meta_data[ticker]['exchange']
+    return exchange_name
+
+def file_exists_in_folder(path, filename):
+    for root, dirs, files in os.walk(path):
+        if filename in files:
+            return True
+    return False
+
+
 data_dir = "data_scraping/twelve_data/data"
 years_to_scrape = 13
 tickers = get_tickers()
@@ -107,4 +137,4 @@ for ticker in tickers:
     get_api_data(ticker, days = 365*years_to_scrape)
     
     
-
+    
